@@ -10,6 +10,9 @@ else
     REAL_USER=$USER
 fi
 
+echo "=== Cleaning up any old/broken docker repository lists ==="
+sudo rm -f /etc/apt/sources.list.d/docker.list
+
 echo "=== Updating system package index ==="
 sudo apt-get update -y
 
@@ -18,16 +21,17 @@ sudo apt-get install -y ca-certificates curl gnupg
 
 echo "=== Setting up Docker's official GPG key ==="
 sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://docker.com -o /etc/apt/keyrings/docker.asc
+sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-echo "=== Adding Docker repository to Apt sources ==="
+echo "=== Adding official Docker repository to Apt sources ==="
+# Explicitly uses download.docker.com and matches your Debian codename (like trixie)
 echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://docker.com \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-echo "=== Updating package index with Docker repo ==="
+echo "=== Updating package index with new repository ==="
 sudo apt-get update -y
 
 echo "=== Installing Docker Engine, CLI, and Docker Compose ==="
